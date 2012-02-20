@@ -1,9 +1,150 @@
+<!DOCTYPE html>
 <html>
 <head>
-  <title>fietsnet.be mashup configurator</title>
+    <title>fietsnet.be mashup configurator</title>
+
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.17/themes/base/jquery-ui.css" />
+
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDvdArdD6D5FVU5t6tFrte9lvOPPrlaD4Y&sensor=false"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js"></script>
+
+    <style type="text/css">
+        textarea#result, div#locmap {
+            width: 100%;
+            height: 400px;
+            padding: 5px;
+        }
+    </style>
+    <script type="text/javascript">
+        $(function() {
+            var $cfg = $('#config');
+
+            var width, height, lat, lon;
+
+
+            // --------- PRODUCE OUTPUT
+            var $res = $cfg.find("#result");
+            function regenerate() {
+                var lat="-", lng="-";
+                if (latLng) {
+                    lat = latLng.lat();
+                    lng = latLng.lng();
+                }
+
+                var res = "" + 
+                        " | width: " + width  + "px" + 
+                        " | height: "+ height + "px" + 
+                        " | latitude: "+ lat + 
+                        " | longitude: "+ lng +
+                        "";
+
+                $res.val(res);
+            }
+            $res.click(function() { $res.select()});
+
+            // --------- PROCESS HEIGHT AND WIDTH
+            var $echoWidthHeight = $cfg.find("#echo_width_height");
+            function echoWidthHeight() {
+                $echoWidthHeight.html(width + " x " + height);
+                regenerate();
+            }
+
+            // ------- HEIGHT
+            function setWidth( w) {
+                width = w;
+                echoWidthHeight();
+            }
+            
+            var $width = $cfg.find("#width");
+            $width.change( function(){
+                setWidth( $(this).val() );
+            });
+            setWidth($width.val());
+
+            // ------ HEIGHT
+            function setHeight( h) {
+                height = h;
+                echoWidthHeight();
+            }
+            
+            var $height = $cfg.find("#height");
+            $height.change( function(){
+                setHeight( $(this).val() );
+            });
+            setHeight($height.val());
+
+
+            // ------- LOCATTION ON MAP
+            // see http://code.google.com/apis/maps/documentation/javascript/tutorial.html
+            var locmap;
+            var latLng, marker;
+            var $echoLatLng = $cfg.find("#echo_lat_lng");
+            function echoLatLng(ll) {
+                latLng = ll;
+                if (marker) { // remove previous flag
+                    marker.setMap(null);
+                    marker = null;
+                }
+                if (!latLng) {
+                    $echoLatLng.html("(onbekende locatie)");
+                } else {
+                    $echoLatLng.html(""+latLng);
+                    marker = new google.maps.Marker({position: latLng, map: locmap});
+                    // locmap.setCenter(marker.getPosition()); >> makes the screen jump around in a confusing way
+                }
+                regenerate();
+            }
+
+            var $locmap = $cfg.find('#locmap');
+            function initMap() {
+                if (locmap) { // only do this once...
+                    return;
+                }
+                var opts = {
+                    center: new google.maps.LatLng( 51.03794,3.092651),
+                    zoom: 9,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP // alternatives: SATELLITE HYBRID TERRAIN 
+                };
+                locmap = new google.maps.Map($locmap[0], opts);
+                google.maps.event.addListener(locmap, 'click', function(event) {
+                    echoLatLng(event.latLng);
+                });
+            }
+
+            $cfg.accordion();
+            $cfg.bind('accordionchange', function(evt, ui){
+                if(ui.newContent.attr('id') == 'tabMap') { initMap(); }
+            });
+        });
+
+    </script>
 </head>
+
 <body>
-<h1>hoi</h1>
-<A HREF="sample.html">sample</A>
+<h1>Configureer je fietsnet.be mashup</h1>
+    <div>Maak je keuzes en pleeg je instellingen op elk van onderstaande topics. Knip en Plak dan het resultaat.</div>
+    <div id="config">
+        <h3><a href="#">Basis: [Afmetingen (<span id="echo_width_height"></span>) - en nog wat?]</a></h3>
+        <div>Breedte <input type="text" id="width" value="500"/> en hoogte <input type="text" id="height" value="500"/> in px.</div>
+
+        <h3><a href="#">Locatie <span id="echo_lat_lng"></span></a></h3>
+        <div id="tabMap">Kies (click) waar je de fietsnet.be-kaart wil centreren. Je kunt uiteraard ook zoomen en schuiven.
+            <div id="locmap" ></div>
+        </div>
+
+        <h3><a href="#">Resultaat</a></h3>
+        <div>
+            <p>Knip en plak dit resultaat als je nieuwe HTML pagina</p>
+            <textarea id="result" readonly="true">...</textarea>
+        </div>
+    </div>
+
+
+    <div id="samples">
+        <h2>Samples</h2>
+        <A HREF="sample.html">locaal voorbeeld rond Westtoer apb</A> |
+        <A HREF="http://www.toerismewesthoek.be/Routeplanner">usage sample at toerismewesthoek</A>
+    </div>
 </body>
 </html>

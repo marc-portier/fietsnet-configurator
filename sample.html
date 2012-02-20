@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <title>Voorbeeld: fietsnet fietsrouteplanner rond Westtoer apb.</title>
+    <style type="text/css">
+        #flashmap { width: 500px; height: 500px }
+        #cityselector { width: 500px; height: 100px }
+        #drivingPanel { width: 500px; height: 100px }
+        .autocompleteTable { padding:0; margin:0; border:1px gray solid; font-size:8pt; border-collapse:collapse; cursor:pointer; }
+        .autocompleteTable td { padding:3px; }
+        .autocompleteSelectedRow { background-color:#ed6401; color:#fff; padding:2px;}
+        .autocompleteUnselectedRow { background-color:#fff; color:#000; padding:2px;}
+        .directionsTable { font-size:9pt; width:240px; }
+        .kilometerCell { text-align: right; }
+        #makesSenseWhenRouteExists { display: none; }
+    </style>
+</head>
+<body>
+
+<div id="flashmap"></div>
+<input id="citySelector" /> <input type="button" onclick="citySelector.select();" value="Zoek" /> 
+<div id="drivingDirections"></div>
+<span id="makesSenseWhenRouteExists" >
+<input type="button" onclick="fietsnetmap.clearLastWayPoint()" value="Verwijder het laatst toegevoegde traject" />
+<input type="button" onclick="fietsnetmap.clearRoute();" value="Verwijder de volledige route" />
+<input type="button" onclick="fietsnetmap.printRoute();" value="Print route" />
+<input type="button" onclick="fietsnetmap.exportRouteAsGpx();" value="Export route als GPX" />
+<input type="button" onclick="fietsnetmap.exportRouteAsKnooppunterPdf();" value="Print route op Knooppunter Pdf" /></span>
+<input type="button" onclick="fietsnetmap.focus(51.186758,3.208662);" value="Westtoer apb" />
+
+<script type="text/javascript" src="http://www.fietsnet.be/routeplanner/api.ashx"></script>
+
+<script type="text/javascript">
+
+    function onDirectionsChanged(numberOfDirections, totalDistance) {
+        document.getElementById("makesSenseWhenRouteExists").style.display = (totalDistance == 0) ? "none" : "inline";
+        return true;
+    }
+
+    var fietsnetmap = new Fietsnet.Map({ 
+        element: "flashmap",  /* Identifier of container for map component. Required. */
+        canNotLoadFlashMessage: "Flash niet geïnstalleerd.",  /* Text to be inserted into div when flash cannot load. E.g. offer directions to download Flash. Optional. */
+	focus: "51.186758 3.208662" /* Indicates latitude/longitude to initially focus map. Optional. */
+    });
+
+    var citySelector = new Fietsnet.CitySelector({
+        element: "citySelector", /* Identifier of container for city selector component. Required. */
+        map: fietsnetmap, /* Map object. Required. */
+        tableStyle: "autocompleteTable",  /* Style for dropdown table. Optional. */
+        selectedRowStyle: "autocompleteSelectedRow", /* Style for selected row in dropdown table. Optional. */
+        unselectedRowStyle: "autocompleteUnselectedRow" /* Style for unselected row in dropdown table. Optional. */
+    });
+
+    var drivingPanel = new Fietsnet.DirectionsPanel({
+        element: "drivingDirections", /* Indentifier of container for driving directions component. Required. */
+        map: fietsnetmap, /* Map object. Required. */
+        tableStyle: "directionsTable", /* Style for driving directions table. Optional. */
+        kmCellStyle: "kilometerCell", /* Style for km cell in driving directions table. Optional. */
+        onChanged: onDirectionsChanged /* Callback handler; will be called when directions change. Optional. */
+    });
+
+</script>
+
+</body>
+</html>
