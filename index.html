@@ -15,110 +15,11 @@
             height: 400px;
             padding: 5px;
         }
+        div#dialog {
+            width: 800px;
+        }
     </style>
-    <script type="text/javascript">
-        $(function() {
-            var $cfg = $('#config');
-
-            var width, height, lat, lon;
-
-
-            // --------- PRODUCE OUTPUT
-            var $res = $cfg.find("#result");
-            function regenerate() {
-                var lat="-", lng="-";
-                if (latLng) {
-                    lat = latLng.lat();
-                    lng = latLng.lng();
-                }
-
-                var res = "" + 
-                        " | width: " + width  + "px" + 
-                        " | height: "+ height + "px" + 
-                        " | latitude: "+ lat + 
-                        " | longitude: "+ lng +
-                        "";
-
-                $res.val(res);
-            }
-            $res.click(function() { $res.select()});
-
-            // --------- PROCESS HEIGHT AND WIDTH
-            var $echoWidthHeight = $cfg.find("#echo_width_height");
-            function echoWidthHeight() {
-                $echoWidthHeight.html(width + " x " + height);
-                regenerate();
-            }
-
-            // ------- HEIGHT
-            function setWidth( w) {
-                width = w;
-                echoWidthHeight();
-            }
-            
-            var $width = $cfg.find("#width");
-            $width.change( function(){
-                setWidth( $(this).val() );
-            });
-            setWidth($width.val());
-
-            // ------ HEIGHT
-            function setHeight( h) {
-                height = h;
-                echoWidthHeight();
-            }
-            
-            var $height = $cfg.find("#height");
-            $height.change( function(){
-                setHeight( $(this).val() );
-            });
-            setHeight($height.val());
-
-
-            // ------- LOCATTION ON MAP
-            // see http://code.google.com/apis/maps/documentation/javascript/tutorial.html
-            var locmap;
-            var latLng, marker;
-            var $echoLatLng = $cfg.find("#echo_lat_lng");
-            function echoLatLng(ll) {
-                latLng = ll;
-                if (marker) { // remove previous flag
-                    marker.setMap(null);
-                    marker = null;
-                }
-                if (!latLng) {
-                    $echoLatLng.html("(onbekende locatie)");
-                } else {
-                    $echoLatLng.html(""+latLng);
-                    marker = new google.maps.Marker({position: latLng, map: locmap});
-                    // locmap.setCenter(marker.getPosition()); >> makes the screen jump around in a confusing way
-                }
-                regenerate();
-            }
-
-            var $locmap = $cfg.find('#locmap');
-            function initMap() {
-                if (locmap) { // only do this once...
-                    return;
-                }
-                var opts = {
-                    center: new google.maps.LatLng( 51.03794,3.092651),
-                    zoom: 9,
-                    mapTypeId: google.maps.MapTypeId.ROADMAP // alternatives: SATELLITE HYBRID TERRAIN 
-                };
-                locmap = new google.maps.Map($locmap[0], opts);
-                google.maps.event.addListener(locmap, 'click', function(event) {
-                    echoLatLng(event.latLng);
-                });
-            }
-
-            $cfg.accordion();
-            $cfg.bind('accordionchange', function(evt, ui){
-                if(ui.newContent.attr('id') == 'tabMap') { initMap(); }
-            });
-        });
-
-    </script>
+    <script type="text/javascript" src="fietsnet-config.js"></script>
 </head>
 
 <body>
@@ -135,11 +36,11 @@
 
         <h3><a href="#">Resultaat</a></h3>
         <div>
-            <p>Knip en plak dit resultaat als je nieuwe HTML pagina</p>
+            <p>Knip en plak dit resultaat als je nieuwe HTML pagina. <button id="tester">Test!</button></p>
             <textarea id="result" readonly="true">...</textarea>
         </div>
     </div>
-
+    <div id="dialog" title="Test je configuratie!"><iframe frameBorder="0"><html></html></iframe></div>
 
     <div id="samples">
         <h2>Samples</h2>
