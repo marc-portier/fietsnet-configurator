@@ -3,19 +3,25 @@ $(function() {
 
     var width, height, lat, lon, 
         title="Fietsnet Routeplanner", 
-        centername="Home!", 
         flashWarning="Flash niet beschikbaar", 
+        opts = {
+            centerButton:       true, 
+            citySelector:       true,
+            drivingDirections:  true,
+            whenRouteExists:    true 
+        },
+        centerButtonLabel="Home!", 
         citySelectorLabel="Zoek gemeente";
 
     // --------- PRODUCE OUTPUT
     var $res = $cfg.find("#result");
     function regenerate() {
-        if (!latLng) {
-            $res.val("<html><body>\nNiet beschikbaar zonder geldige locatie-coordinaat\n</body></html>");
-            return;
+        var centerAvailable, lat, lng;
+        if (latLng != null) {
+            centerAvailable = true;
+            lat = latLng.lat();
+            lng = latLng.lng();
         }
-        var lat = latLng.lat();
-        var lng = latLng.lng();
 
         var res = "" + 
         "<html><head><title>" + title + "</title>\n" +
@@ -29,30 +35,53 @@ $(function() {
             "\t.kilometerCell { text-align: right; }\n"+
            "\t#makesSenseWhenRouteExists { display: none; }\n" + 
         "</style></head><body>\n" + 
+
         "<div id='flashmap'></div>\n" + 
-        "<input id='citySelector' /> <input type='button' onclick='citySelector.select();' value='" + citySelectorLabel + "' /> \n"+
-        "<div id='drivingDirections'></div>\n"+
-        "<span id='makesSenseWhenRouteExists' >\n"+ 
-        "\t<input type='button' onclick='fietsnetmap.clearLastWayPoint()' value='Verwijder het laatst toegevoegde traject' />\n"+
-        "\t<input type='button' onclick='fietsnetmap.clearRoute();' value='Verwijder de volledige route' />\n"+
-        "\t<input type='button' onclick='fietsnetmap.printRoute();' value='Print route' />\n"+
-        "\t<input type='button' onclick='fietsnetmap.exportRouteAsGpx();' value='Export route als GPX' />\n"+
-        "\t<input type='button' onclick='fietsnetmap.exportRouteAsKnooppunterPdf();' value='Print route op Knooppunter Pdf' />\n</span>\n"+
-        "<input type='button' onclick='fietsnetmap.focus(" + lat + ","+ lng + ");' value='"+ centername + "' />\n"+
+
+        (opts.citySelector ? 
+            "<input id='citySelector' /> <input type='button' onclick='citySelector.select();' value='" + citySelectorLabel + "' /> \n" 
+            : "" ) +
+        (opts.drivingDirections ? 
+            "<div id='drivingDirections'></div>\n"
+            : "" ) +
+        (opts.whenRouteExists ?
+            "<span id='makesSenseWhenRouteExists' >\n" +
+            "\t<input type='button' onclick='fietsnetmap.clearLastWayPoint()' value='Verwijder het laatst toegevoegde traject' />\n"+
+            "\t<input type='button' onclick='fietsnetmap.clearRoute();' value='Verwijder de volledige route' />\n"+
+            "\t<input type='button' onclick='fietsnetmap.printRoute();' value='Print route' />\n"+
+            "\t<input type='button' onclick='fietsnetmap.exportRouteAsGpx();' value='Export route als GPX' />\n"+
+            "\t<input type='button' onclick='fietsnetmap.exportRouteAsKnooppunterPdf();' value='Print route op Knooppunter Pdf' />\n</span>\n"
+            : "" ) + 
+        (centerAvailable && opts.centerButton ? 
+            "<input type='button' onclick='fietsnetmap.focus(" + lat + ","+ lng + ");' value='"+ centerButtonLabel + "' />\n"
+            : "" ) +
         "<script type='text/javascript' src='http://www.fietsnet.be/routeplanner/api.ashx'></script>\n" +
         "<script type='text/javascript'>\n"+
-            "\tfunction onDirectionsChanged(numberOfDirections, totalDistance) {\n"+
-                "\t\tdocument.getElementById('makesSenseWhenRouteExists').style.display = (totalDistance == 0) ? 'none' : 'inline';\n"+
-                "\t\treturn true; \n\t}"+
+
             "\tvar fietsnetmap = new Fietsnet.Map({ \n"+
-                "\t\telement: 'flashmap',  canNotLoadFlashMessage: '" + flashWarning + ".', \n" +
-                "\t\tfocus: '"+ lat +" "+ lng + "' });\n"+
-            "\tvar citySelector = new Fietsnet.CitySelector({ \n"+ 
-                "\t\telement: 'citySelector', map: fietsnetmap, tableStyle: 'autocompleteTable', \n"+
-                "\t\tselectedRowStyle: 'autocompleteSelectedRow', unselectedRowStyle: 'autocompleteUnselectedRow' });\n"+
-            "\tvar drivingPanel = new Fietsnet.DirectionsPanel({\n"+
-                "\t\telement: 'drivingDirections', map: fietsnetmap, tableStyle: 'directionsTable', \n"+
-                "\t\tkmCellStyle: 'kilometerCell', onChanged: onDirectionsChanged });\n"+
+                (centerAvailable ? "\t\tfocus: '"+ lat +" "+ lng + "',\n" : "" ) + 
+                "\t\telement: 'flashmap',  canNotLoadFlashMessage: '" + flashWarning + ".'\n\t});\n"+
+
+            (opts.whenRouteExists ?
+                "\tfunction onDirectionsChanged(numberOfDirections, totalDistance) {\n"+
+                    "\t\tdocument.getElementById('makesSenseWhenRouteExists').style.display = (totalDistance == 0) ? 'none' : 'inline';\n"+
+                    "\t\treturn true; \n\t}" 
+                : "" ) +
+
+            (opts.citySelector ? 
+                "\tvar citySelector = new Fietsnet.CitySelector({ \n"+ 
+                    "\t\telement: 'citySelector', map: fietsnetmap, tableStyle: 'autocompleteTable', \n"+
+                    "\t\tselectedRowStyle: 'autocompleteSelectedRow', unselectedRowStyle: 'autocompleteUnselectedRow' });\n"
+                : "" ) +
+
+            (opts.drivingDirections ? 
+                "\tvar drivingPanel = new Fietsnet.DirectionsPanel({\n"+
+                    (opts.whenRouteExists ?
+                        "\t\tonChanged: onDirectionsChanged, \n" 
+                        : "" ) +
+                    "\t\telement: 'drivingDirections', map: fietsnetmap, tableStyle: 'directionsTable', \n"+
+                    "\t\tkmCellStyle: 'kilometerCell'});\n"
+                : "" ) +
         "</script></body></html>";
 
         $res.val(res);
@@ -66,30 +95,80 @@ $(function() {
         regenerate();
     }
 
-    // ------- HEIGHT
-    function setWidth( w) {
-        width = w;
-        echoWidthHeight();
-    }
-    
     var $width = $cfg.find("#width");
     $width.change( function(){
-        setWidth( $(this).val() );
-    });
-    setWidth($width.val());
-
-    // ------ HEIGHT
-    function setHeight( h) {
-        height = h;
+        width = $(this).val();
         echoWidthHeight();
-    }
-    
+    });
+    $width.change();
+
     var $height = $cfg.find("#height");
     $height.change( function(){
-        setHeight( $(this).val() );
+        height = $(this).val();
+        echoWidthHeight();
     });
-    setHeight($height.val());
+    $height.change();
 
+    var TRUNKSIZE = 10;
+
+    // --------- PROCESS TITLE
+    var $echoTitle = $cfg.find("#echo_title");
+    function echoTitle() {
+        $echoTitle.html( title.substring(0, TRUNKSIZE) + (title.length > TRUNKSIZE ? "..." : "") );
+        regenerate();
+    }
+    var $title = $cfg.find("#title");
+    $title.change( function() {
+        title = $(this).val();
+        echoTitle();
+    });
+    $title.change();
+
+    // --------- PROCESS WARNING
+    var $echoFlashWarning = $cfg.find("#echo_flashWarning");
+    function echoFlashWarning() {
+        $echoFlashWarning.html( flashWarning.substring(0, TRUNKSIZE) + (flashWarning.length > TRUNKSIZE ? "..." : "") );
+        regenerate();
+    }
+    var $flashWarning = $cfg.find("#flashWarning");
+    $flashWarning.change( function() {
+        flashWarning = $(this).val();
+        echoFlashWarning();
+    });
+    $flashWarning.change();
+
+    // --------- PROCESS OPTIONS
+    var $echoOptions = $cfg.find("#echo_options");
+    function echoOptions() {
+        var optCount = 0;
+        var allCount = 0;
+        var opt; for (opt in opts) { if ( opts[opt] ) { optCount++ }; allCount++; }
+        $echoOptions.html(optCount + "/" + allCount);
+        regenerate();
+    }
+    var $opts=$([]);
+    var opt; for (opt in opts) { 
+        $opts = $opts.add('#' + opt + 'Opt');
+    }
+    $opts.click( function() { 
+        var $this = $(this); 
+        opts[$this.attr('id').replace(/Opt$/,'')]=( !!$this.attr('checked')); 
+        echoOptions();  
+    });
+    echoOptions();
+
+    var $centerButtonLabel = $cfg.find('#centerButtonLabel').change( function() {
+        centerButtonLabel = $(this).val();
+        regenerate();
+    });
+    $centerButtonLabel.change();
+
+    var $citySelectorLabel = $cfg.find('#citySelectorLabel').change( function() {
+        citySelectorLabel = $(this).val();
+        regenerate();
+    });
+    $citySelectorLabel.change();
+     
 
     // ------- LOCATTION ON MAP
     // see http://code.google.com/apis/maps/documentation/javascript/tutorial.html
@@ -103,7 +182,7 @@ $(function() {
             marker = null;
         }
         if (!latLng) {
-            $echoLatLng.html("(onbekende locatie)");
+            $echoLatLng.html("(geen locatie voor centrering)");
         } else {
             $echoLatLng.html(""+latLng);
             marker = new google.maps.Marker({position: latLng, map: locmap});
@@ -113,6 +192,9 @@ $(function() {
     }
 
     var $locmap = $cfg.find('#locmap');
+    var $clearLoc = $cfg.find('#clearLoc');
+    $clearLoc.click( function(){ echoLatLng(); } );
+    echoLatLng();
     function initMap() {
         if (locmap) { // only do this once...
             return;

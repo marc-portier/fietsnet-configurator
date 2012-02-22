@@ -18,6 +18,12 @@
         div#dialog {
             width: 800px;
         }
+        button#clearLoc {
+            float: right;
+        }
+        #config ul {
+            list-style-type: none;
+        }
     </style>
     <script type="text/javascript" src="fietsnet-config.js"></script>
 </head>
@@ -26,11 +32,42 @@
 <h1>Configureer je fietsnet.be mashup</h1>
     <div>Maak je keuzes en pleeg je instellingen op elk van onderstaande topics. Knip en Plak dan het resultaat.</div>
     <div id="config">
-        <h3><a href="#">Basis: [Afmetingen (<span id="echo_width_height"></span>) - en nog wat?]</a></h3>
-        <div>Breedte <input type="text" id="width" value="500"/> en hoogte <input type="text" id="height" value="500"/> in px.</div>
+        <h3><a href="#">Basis: [
+            Afmetingen (<span id="echo_width_height"></span>)
+          - Titel (<span id="echo_title"></span>)
+          - FlashWarning (<span id="echo_flashWarning"></span>)
+          - Opties (<span id="echo_options"></span>)
+        ]</a></h3>
+        <div>
+            Breedte <input type="text" id="width" value="500"/> en hoogte <input type="text" id="height" value="500"/> in px.
+            <br />
+            Titel Pagina  <input type="text" id="title" value="Fietsnet Routeplanner." size="80" />
+            <br />
+            Flash Warning <input type="text" id="flashWarning" value="Flash niet beschikbaar." size="80" />
+            <br />
+            Opties: 
+            <ul>
+              <li>
+                <input  type="checkbox" checked="checked" id="centerButtonOpt" /> Knop voor centreren op locatie
+                met button-label <input type="text" id="centerButtonLabel" value="Home!" />
+              </li>
+                <input  type="checkbox" checked="checked" id="citySelectorOpt" /> Veld voor zoeken op gemeente
+                met button-label <input type="text" id="citySelectorLabel" value="Zoek Gemeente!" />
+              <li>
+              </li>
+                <input  type="checkbox" checked="checked" id="whenRouteExistsOpt" /> Sectie voor route-behandeling (wanneer route beschikbaar)
+              <li>
+              </li>
+                <input  type="checkbox" checked="checked" id="drivingDirectionsOpt" /> Sectie voor weg-beschrijving (wanneer route beschikbaar)
+              <li>
+              </li>
+            </ul>
+
+        </div>
 
         <h3><a href="#">Locatie <span id="echo_lat_lng"></span></a></h3>
         <div id="tabMap">Kies (click) waar je de fietsnet.be-kaart wil centreren. Je kunt uiteraard ook zoomen en schuiven.
+            <button id="clearLoc">Ingestelde locatie wissen</button>
             <div id="locmap" ></div>
         </div>
 
@@ -45,7 +82,7 @@
     <div id="samples">
         <h2>Samples</h2>
         <A HREF="sample.html">locaal voorbeeld rond Westtoer apb</A> |
-        <A HREF="http://www.toerismewesthoek.be/Routeplanner">usage sample at toerismewesthoek</A>
+        <A HREF="http://www.fietsnet.be/routeplanner/example.htm">voorbeeld op fietsnet.be</A>
     </div>
 </body>
 </html>
