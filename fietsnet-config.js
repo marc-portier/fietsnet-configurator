@@ -1,3 +1,7 @@
+/*
+(c) 2012 Marc Portier, Westtoer. 
+Licensed through CC-BY-SA 2.0 - BE  http://creativecommons.org/licenses/by-sa/2.0/be/
+*/
 $(function() {
     var $cfg = $('#config');
 
